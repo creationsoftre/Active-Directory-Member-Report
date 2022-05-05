@@ -1,4 +1,16 @@
-﻿$cxt_SamAccounts = "TP_GBD_Cxt_Dev_UserDev", "TP_GBD_Cxt_Dev_BusAdminDev", "TP_GBD_Cxt_Dev_SysAdminDev", "TP_GBD_Cxt_QA_User", "TP_GBD_Cxt_QA_SysAdmin", "TP_GBD_Cxt_QA_BusAdmin", "TP_GBD_Cxt_Prod_User", "TP_GBD_Cxt_Prod_SysAdmin", "TP_GBD_Cxt_Prod_BusAdmin"
+﻿<###############################
+Title: Get Active Directory ClaimsXten Users
+Author: TW
+Original: 2022_02_27
+Last Updated: 2022_02_27
+	
+
+Overview:
+- This script is to list all users who have access to ClaimsXten per user role
+- auditing purposes
+###############################>
+
+$cxt_SamAccounts = @("SAM ACCOUNTS")
 
 #create excel application
 $excel = New-Object -ComObject excel.application
@@ -51,7 +63,7 @@ foreach($cxt_samAccount in $cxt_SamAccounts)
     #Resets column back to 1 for each worksheet
     $column = 1
     if($cxt_samAccount -like '*DEV*' -or $cxt_samAccount -like '*QA*'){
-        $info = Get-ADGroupMember -Identity $cxt_samAccount -Server 'devad.wellpoint.com' | foreach{ get-aduser $_ -Properties *} | Select DisplayName, SamAccountName, whenCreated, LastLogonDate, Enabled, MemberOf
+        $info = Get-ADGroupMember -Identity $cxt_samAccount -Server 'DEV-AD' | foreach{ get-aduser $_ -Properties *} | Select DisplayName, SamAccountName, whenCreated, LastLogonDate, Enabled, MemberOf
 
         $row++
         for($i = 0 ; $i -lt $info.Length; $i++){
@@ -72,7 +84,7 @@ foreach($cxt_samAccount in $cxt_SamAccounts)
     }
 
     if($cxt_samAccount -like '*PROD*'){
-        $info = Get-ADGroupMember -Identity $cxt_samAccount -Server 'us.ad.wellpoint.com'| foreach{ get-aduser $_ -Properties *} | Select DisplayName, SamAccountName, whenCreated, LastLogonDate, Enabled, MemberOf
+        $info = Get-ADGroupMember -Identity $cxt_samAccount -Server 'PROD-AD'| foreach{ get-aduser $_ -Properties *} | Select DisplayName, SamAccountName, whenCreated, LastLogonDate, Enabled, MemberOf
 
         $row++
         for($i = 0 ; $i -lt $info.Length; $i++){
@@ -103,7 +115,7 @@ foreach($cxt_samAccount in $cxt_SamAccounts)
 $workbook.worksheets.item("Sheet1").Delete()
 
 #Save the file
-$workbook.SaveAs("\\va01pstodfs003.corp.agp.ads\apps\Local\EMT\COTS\McKesson\ClaimsXten\Active Directory\CXT_AD_Users_List.xlsx")
+$workbook.SaveAs("PATH\\CXT_AD_Users_List.xlsx")
 
 #close workbook
 #$workbook.Close
